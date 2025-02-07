@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSON;
 import com.github.mirror.cache.api.ICache;
 import com.github.mirror.cache.core.model.PersistRdbEntry;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -35,11 +37,11 @@ public class CachePersistDbJson<K,V> extends CachePersistAdaptor<K,V> {
     @Override
     public void persist(ICache<K, V> cache) {
         Set<Map.Entry<K,V>> entrySet = cache.entrySet();
-
+        File file = new File(System.getProperty("user.dir"), dbPath);
         // 创建文件
-        FileUtil.touch(dbPath);
+        FileUtil.touch(file);
         // 清空文件
-        FileUtil.clean(dbPath);
+        FileUtil.writeUtf8Lines(Collections.emptyList(),file);
 //        FileUtil.truncate(dbPath);
 
         for(Map.Entry<K,V> entry : entrySet) {
@@ -52,18 +54,18 @@ public class CachePersistDbJson<K,V> extends CachePersistAdaptor<K,V> {
 
             String line = JSON.toJSONString(persistRdbEntry);
 //            com.github.houbb.heaven.util.io.FileUtil.writeString(dbPath,line, StandardOpenOption.APPEND);
-            FileUtil.appendUtf8String(line,dbPath);
+            FileUtil.appendUtf8String(line + System.lineSeparator(),file);
         }
     }
 
     @Override
     public long delay() {
-        return 5;
+        return 3;
     }
 
     @Override
     public long period() {
-        return 5;
+        return 3;
     }
 
     @Override

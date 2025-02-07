@@ -6,6 +6,7 @@ import com.github.mirror.cache.api.ICache;
 import com.github.mirror.cache.util.LogUtil;
 import com.github.mirror.cache.util.LogUtil.SimpleLogger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -48,13 +49,14 @@ public class CachePersistAof<K, V> extends CachePersistAdaptor<K, V> {
     @Override
     public void persist(ICache<K, V> cache) {
         log.info("开始 AOF 持久化到文件");
+        File file = new File(System.getProperty("user.dir"), dbPath);
         // 1. 创建文件
-        FileUtil.touch(dbPath);
+        FileUtil.touch(file);
 //        if(!FileUtil.exists(dbPath)) {
 //            FileUtil.createFile(dbPath);
 //        }
         // 2. 持久化追加到文件中
-        FileUtil.appendUtf8Lines(bufferList, dbPath);
+        FileUtil.appendUtf8Lines(bufferList, file);
 
         // 3. 清空 buffer 列表
         bufferList.clear();
@@ -86,9 +88,6 @@ public class CachePersistAof<K, V> extends CachePersistAdaptor<K, V> {
         if(StrUtil.isNotEmpty(json)) {
             bufferList.add(json);
         }
-//        if(StringUtil.isNotEmpty(json)) {
-//            bufferList.add(json);
-//        }
     }
 
 }
