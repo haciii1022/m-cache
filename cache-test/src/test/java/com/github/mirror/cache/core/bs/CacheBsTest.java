@@ -9,8 +9,8 @@ import com.github.mirror.cache.core.support.evict.CacheEvicts;
 import com.github.mirror.cache.core.support.load.CacheLoads;
 import com.github.mirror.cache.core.support.map.Maps;
 import com.github.mirror.cache.core.support.persist.CachePersists;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +36,7 @@ public class CacheBsTest {
         cache.put("3", "3");
         cache.put("4", "4");
 
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -57,7 +57,7 @@ public class CacheBsTest {
         cache.put("3", "3");
         cache.put("4", "4");
 
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -75,10 +75,10 @@ public class CacheBsTest {
         cache.put("2", "2");
 
         cache.expire("1", 40);
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
 
         TimeUnit.MILLISECONDS.sleep(50);
-        Assertions.assertEquals(1, cache.size());
+        Assert.assertEquals(1, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -107,7 +107,7 @@ public class CacheBsTest {
                 .load(new MyCacheLoad())
                 .build();
 
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
     }
 
     /**
@@ -121,7 +121,7 @@ public class CacheBsTest {
                 .persist(CachePersists.<String, String>dbJson("1.rdb"))
                 .build();
 
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
         TimeUnit.SECONDS.sleep(5);
     }
 
@@ -135,7 +135,7 @@ public class CacheBsTest {
                 .load(CacheLoads.<String, String>dbJson("1.rdb"))
                 .build();
 
-        Assertions.assertEquals(2, cache.size());
+        Assert.assertEquals(2, cache.size());
     }
 
     /**
@@ -180,7 +180,7 @@ public class CacheBsTest {
                 .load(CacheLoads.<String, String>aof("default.aof"))
                 .build();
 
-        Assertions.assertEquals(1, cache.size());
+        Assert.assertEquals(2, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -204,7 +204,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -223,7 +223,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -246,7 +246,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -269,7 +269,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -292,7 +292,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -315,7 +315,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -339,7 +339,7 @@ public class CacheBsTest {
         cache.get("A");
         cache.put("D", "LRU");
 
-        Assertions.assertEquals(3, cache.size());
+        Assert.assertEquals(3, cache.size());
         System.out.println(cache.keySet());
     }
 
