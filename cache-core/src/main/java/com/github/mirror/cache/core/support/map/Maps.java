@@ -2,6 +2,7 @@ package com.github.mirror.cache.core.support.map;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author binbin.hou
@@ -20,6 +21,9 @@ public final class Maps {
      */
     public static <K,V> Map<K,V> hashMap() {
         return new HashMap<>();
+    }
+    public static <K,V> Map<K,V> concurrentHashMap() {
+        return new ConcurrentHashMap<>();
     }
 
 }

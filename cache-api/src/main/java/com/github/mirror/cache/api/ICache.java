@@ -2,6 +2,7 @@ package com.github.mirror.cache.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存接口
@@ -100,4 +101,24 @@ public interface ICache<K, V> extends Map<K, V> {
      */
     ICacheEvict<K,V> evict();
 
+    /**
+     * put 操作,并且设置过期时间
+     * @param key
+     * @param value
+     * @param timeInMills
+     * @return
+     * 2025/2/8 add
+     */
+    V put(K key, V value,final long timeInMills);
+
+    /**
+     * put 操作，并且设置过期时间, 时间单位
+     * @param key
+     * @param value
+     * @param time
+     * @param timeUnit
+     * @return
+     * 2025/2/8 add
+     */
+    V put(K key, V value, final long time,final TimeUnit timeUnit);
 }

@@ -38,20 +38,13 @@ public class CacheLoadAof<K,V> implements ICacheLoad<K,V> {
 
     static {
         Method[] methods = Cache.class.getMethods();
-
-        for(Method method : methods){
+        for (Method method : methods) {
             CacheInterceptor cacheInterceptor = method.getAnnotation(CacheInterceptor.class);
-
-            if(cacheInterceptor != null) {
-                // 暂时
-                if(cacheInterceptor.aof()) {
-                    String methodName = method.getName();
-
-                    METHOD_MAP.put(methodName, method);
-                }
+            if (cacheInterceptor != null && cacheInterceptor.aof()) {
+                // 使用 "方法名#参数个数" 作为 Key
+                METHOD_MAP.put(method.getName() + "#" + method.getParameterCount(), method);
             }
         }
-
     }
 
     /**
@@ -90,11 +83,10 @@ public class CacheLoadAof<K,V> implements ICacheLoad<K,V> {
 
             final String methodName = entry.getMethodName();
             final Object[] objects = entry.getParams();
-
-            final Method method = METHOD_MAP.get(methodName);
+            String key = methodName + "#" + objects.length;
+            final Method method = METHOD_MAP.get(key);
             // 反射调用
             ReflectUtil.invoke(cache, method, objects);
         }
     }
-
 }

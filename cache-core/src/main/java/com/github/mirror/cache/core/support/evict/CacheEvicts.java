@@ -125,4 +125,14 @@ public final class CacheEvicts {
         return new CacheEvictClock<>();
     }
 
+    /**
+     * SC算法
+     * @param <K> key
+     * @param <V> value
+     * @return 结果
+     * @since 0.1.0
+     */
+    public static <K, V> ICacheEvict<K, V> sc() {
+        return new CacheEvictSC<>();
+    }
 }

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存信息
@@ -287,6 +288,22 @@ public class Cache<K,V> implements ICache<K,V> {
 
         //3. 执行添加
         return map.put(key, value);
+    }
+
+    @Override
+    public V put(K key, V value, final long timeInMills) {
+        long expireTime = System.currentTimeMillis() + timeInMills;
+
+        // 使用代理调用
+        Cache<K,V> cachePoxy = (Cache<K, V>) CacheProxy.getProxy(this);
+        V put = cachePoxy.put(key, value);
+        cachePoxy.expireAt(key, expireTime);
+        return put;
+    }
+
+    @Override
+    public V put(K key, V value, long time, TimeUnit timeUnit) {
+        return this.put(key, value, timeUnit.toMillis(time));
     }
 
     /**

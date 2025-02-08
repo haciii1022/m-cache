@@ -48,7 +48,7 @@ public class CachePersistAof<K, V> extends CachePersistAdaptor<K, V> {
      */
     @Override
     public void persist(ICache<K, V> cache) {
-        log.info("开始 AOF 持久化到文件");
+        log.info("开始 AOF 持久化到文件 {}", bufferList);
         File file = new File(System.getProperty("user.dir"), dbPath);
         // 1. 创建文件
         FileUtil.touch(file);
@@ -60,7 +60,7 @@ public class CachePersistAof<K, V> extends CachePersistAdaptor<K, V> {
 
         // 3. 清空 buffer 列表
         bufferList.clear();
-        log.info("完成 AOF 持久化到文件");
+        log.info("完成 AOF 持久化到文件 {}", bufferList);
     }
 
     @Override

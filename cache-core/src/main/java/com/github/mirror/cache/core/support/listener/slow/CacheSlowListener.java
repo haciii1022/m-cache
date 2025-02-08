@@ -3,7 +3,6 @@ package com.github.mirror.cache.core.support.listener.slow;
 import com.alibaba.fastjson.JSON;
 import com.github.mirror.cache.api.ICacheSlowListener;
 import com.github.mirror.cache.api.ICacheSlowListenerContext;
-import com.github.mirror.cache.core.support.interceptor.common.CacheInterceptorCost;
 import com.github.mirror.cache.util.LogUtil;
 import com.github.mirror.cache.util.LogUtil.SimpleLogger;
 
@@ -14,11 +13,11 @@ import com.github.mirror.cache.util.LogUtil.SimpleLogger;
  */
 public class CacheSlowListener implements ICacheSlowListener {
 
-    private static final SimpleLogger log = LogUtil.getLogger(CacheInterceptorCost.class);
+    private static final SimpleLogger log = LogUtil.getLogger(CacheSlowListener.class);
 
     @Override
     public void listen(ICacheSlowListenerContext context) {
-        log.warn("[Slow] methodName: {}, params: {}, cost time: {}",
+        log.warn("[Slow] methodName: {}, params: {}, cost time: {} ms",
                 context.methodName(), JSON.toJSON(context.params()), context.costTimeMills());
     }
 
