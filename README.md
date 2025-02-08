@@ -1,15 +1,12 @@
 # 项目简介
 
-[Cache](https://github.com/mirror/cache) 用于实现一个可拓展的本地缓存。
+[Cache](https://github.com/haciii1022/m-cache) 用于实现一个可拓展的本地缓存。
 
 有人的地方，就有江湖。
 
 有高性能的地方，就有 cache。
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mirror/cache/badge.svg)](http://mvnrepository.com/artifact/com.github.mirror/cache)
-[![Build Status](https://www.travis-ci.org/mirror/cache.svg?branch=master)](https://www.travis-ci.org/mirror/cache?branch=master)
 [![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/mirror/cache/blob/master/LICENSE.txt)
-[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/mirror/cache)
 
 ## 创作目的
 
@@ -43,10 +40,6 @@
 
 RDB 和 AOF 两种模式
 
-# 变更日志
-
-> [变更日志](https://github.com/mirror/cache/blob/master/doc/CHANGELOG.md)
-
 # 快速开始
 
 ## 准备
@@ -58,6 +51,17 @@ Maven 3.X 及其以上版本
 ## maven 项目依赖
 
 ```xml
+<repositories>
+    <repository>
+        <id>maven-repo</id>
+        <url>https://raw.github.com/haciii1022/maven-repo/main</url>
+        <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+        </snapshots>
+    </repository>
+</repositories>
+
 <dependency>
     <groupId>com.github.mirror</groupId>
     <artifactId>cache-core</artifactId>
@@ -65,39 +69,22 @@ Maven 3.X 及其以上版本
 </dependency>
 ```
 
-## 入门测试
-
-```java
-ICache<String, String> cache = CacheBs.<String,String>newInstance()
-                .size(2)
-                .build();
-
-cache.put("1", "1");
-cache.put("2", "2");
-cache.put("3", "3");
-cache.put("4", "4");
-
-Assert.assertEquals(2, cache.size());
-```
-
-默认为先进先出的策略，此时输出 keys，内容如下：
-
-```
-[3, 4]
-```
-
 ## 引导类配置属性
 
 `CacheBs` 作为缓存的引导类，支持 fluent 写法，编程更加优雅便捷。
 
-上述配置等价于：
+
 
 ```java
-ICache<String, String> cache = CacheBs.<String,String>newInstance()
-                .map(Maps.<String,String>hashMap())
-                .evict(CacheEvicts.<String, String>fifo())
-                .size(2)
-                .build();
+    ICache<String, String> cache = CacheBs.<String,String>newInstance()
+            .map(Maps.<String, String>concurrentHashMap())
+            .load(CacheLoads.<String, String>aof("1.aof"))
+            .persist(CachePersists.<String, String>aof("1.aof"))
+            .evict(CacheEvicts.<String, String>lru2())
+            .addRemoveListener(new MyRemoveListener<String, String>())
+            .addSlowListener(CacheSlowListeners.defaults())
+            .size(33)
+            .build();
 ```
 
 ## 淘汰策略
@@ -127,12 +114,16 @@ cache.put("2", "2");
 cache.expire("1", 10);
 Assert.assertEquals(2, cache.size());
 
+cache.put("3","abc",500);
+cache.put("4","abcd",1,TimeUnit.SECONDS);
 TimeUnit.MILLISECONDS.sleep(50);
-Assert.assertEquals(1, cache.size());
+Assert.assertEquals(3, cache.size());
 System.out.println(cache.keySet());
 ```
 
 `cache.expire("1", 10);` 指定对应的 key 在 10ms 后过期。
+`cache.put("3","abc",500);` put新key，同时指定对应的 key 在 500ms 后过期。
+`cache.put("4","abcd",1,TimeUnit.SECONDS);` 同上，且支持输入时间单位。
 
 # 删除监听器
 
@@ -151,7 +142,7 @@ public class MyRemoveListener<K,V> implements ICacheRemoveListener<K,V> {
 
     @Override
     public void listen(ICacheRemoveListenerContext<K, V> context) {
-        System.out.println("【删除提示】可恶，我竟然被删除了！" + context.key());
+        System.out.println("【删除提示】已经删除: " + context.key());
     }
 
 }
@@ -172,7 +163,7 @@ cache.put("2", "2");
 - 测试日志
 
 ```
-【删除提示】可恶，我竟然被删除了！2
+【删除提示】已经删除: 2
 ```
 
 # 添加慢操作监听器
@@ -207,7 +198,7 @@ public class MySlowListener implements ICacheSlowListener {
 
     @Override
     public long slowerThanMills() {
-        return 0;
+        return 1;
     }
 
 }
@@ -227,11 +218,11 @@ cache.get("1");
 - 测试效果
 
 ```
-[DEBUG] [2020-09-30 17:40:11.547] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: put
-[DEBUG] [2020-09-30 17:40:11.551] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: put, cost: 10ms
+[DEBUG] [2024-12-30 17:40:11.547] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: put
+[DEBUG] [2024-12-30 17:40:11.551] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: put, cost: 10ms
 【慢日志】name: put
-[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: get
-[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: get, cost: 1ms
+[DEBUG] [2024-12-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: get
+[DEBUG] [2024-12-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: get, cost: 1ms
 【慢日志】name: get
 ```
 
@@ -315,20 +306,20 @@ public void persistTest() throws InterruptedException {
 存储之后，可以使用对应的加载器读取文件内容：
 
 ```java
-ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    ICache<String, String> cache = CacheBs.<String,String>newInstance()
         .load(CacheLoads.<String, String>dbJson("1.rdb"))
         .build();
 
-Assert.assertEquals(2, cache.size());
+    Assert.assertEquals(2, cache.size());
 ```
 
 # 后期 Road-MAP
 
 ## 淘汰策略
 
-- [ ] CLOCK 算法
+- [x] CLOCK 算法
 
-- [ ] SC 二次机会
+- [x] SC 二次机会
 
 - [ ] 老化算法
 
@@ -338,7 +329,7 @@ Assert.assertEquals(2, cache.size());
 
 - [ ] 过期策略添加随机返回
 
-- [ ] expireAfterWrite()
+- [x] expireAfterWrite()
 
 - [ ] expireAfterAccess()
 
@@ -350,17 +341,17 @@ Assert.assertEquals(2, cache.size());
 
 - [ ] 命中率
 
-- [ ] keys 数量
+- [x] keys 数量
 
 - [ ] evict 数量
 
 - [ ] expire 数量
 
-- [ ] 耗时统计
+- [x] 耗时统计
 
 ## 并发
 
-- [ ] 并发安全保障
+- [x] 并发安全保障
 
 ## 其他
 
@@ -375,94 +366,3 @@ Assert.assertEquals(2, cache.size());
 - [ ] 独立服务端
 
 提供类似于 redis-server + redis-client 的拆分，便于独立于应用作为服务存在。
-
-# 拓展阅读
-
-[java从零手写实现redis（一）如何实现固定大小的缓存？](https://mp.weixin.qq.com/s/6J2K2k4Db_20eGU6xGYVTw)
-
-[java从零手写实现redis（三）redis expire 过期原理](https://mp.weixin.qq.com/s/BWfBc98oLqhAPLN2Hgkwow)
-
-[java从零手写实现redis（三）内存数据如何重启不丢失？](https://mp.weixin.qq.com/s/G41SRZQm1_0uQXBAGHAYbw)
-
-[java从零手写实现redis（四）添加监听器](https://mp.weixin.qq.com/s/6pIG3l_wkXBwSuJvj_KwMA)
-
-[java从零手写实现redis（五）过期策略的另一种实现思路](https://mp.weixin.qq.com/s/Atrd36UGds9_w_NFQDoEQg)
-
-[java从零手写实现redis（六）AOF 持久化原理详解及实现](https://mp.weixin.qq.com/s/rFuSjNF43Ybxy-qBCtgasQ)
-
-[java从零开始手写redis（七）LRU 缓存淘汰策略详解](https://mp.weixin.qq.com/s/X-OIqu_rgLskvbF2rZMP6Q)
-
-[java从零开始手写redis（八）朴素 LRU 淘汰算法性能优化](https://mp.weixin.qq.com/s/H8gOujnlTinctjVQqW0ITA)
-
-[java 从零开始手写 redis（九）LRU 缓存淘汰算法如何避免缓存污染](https://mp.weixin.qq.com/s/jzM_wDw37QXTeYMFYtRJaw)
-
-[java 从零开始手写 redis（十）缓存淘汰算法 LFU 最少使用频次](https://mp.weixin.qq.com/s/mUyCTCVObwY8XdLcO1pOWg)
-
-[java 从零开始手写 redis（11）clock时钟淘汰算法详解及实现](https://mp.weixin.qq.com/s/h9oub0TT94ObaiKZ7s5VsA)
-
-[java 从零开始手写 redis（12）redis expire 过期如何实现随机获取keys？](https://mp.weixin.qq.com/s/YEBPtrOWIyBl9dsHa59JYg)
-
-[java从零开始手写 redis（13）HashMap 源码原理详解](https://mp.weixin.qq.com/s/SURVmTf6K_ou85fShFzrNA)
-
-[java 从零开始手写 redis（14）redis渐进式rehash详解](https://mp.weixin.qq.com/s/gPD-4wCwirdyO5QyHrXOIA)
-
-[java 从零开始手写 redis（15）实现自己的 HashMap](https://mp.weixin.qq.com/s/e5fskVfeDMTuJhjEAd1gQw)
-
-[java 从零开始手写 redis（16）实现渐进式 rehash map](https://mp.weixin.qq.com/s/Lwp2js4lrHAbuQ5Fexer6w)
-
-【实战汇总】
-
-[缓存实战（1）缓存雪崩、缓存击穿和缓存穿透入门简介及解决方案](https://mp.weixin.qq.com/s/yYE-zqJOyiLlEYXRj5by9g)
-
-[缓存实战（2）布隆过滤器是啥？guava 的 BloomFilter 使用](https://mp.weixin.qq.com/s/dY-0jE23jggU3wqjdHGyZQ)
-
-[缓存实战（3）让你彻底搞懂布隆过滤器！实现一个自己的BloomFilter](https://mp.weixin.qq.com/s/UsIjHfiy96aZgpzybuBYgg)
-
-[缓存实战（4）bloom filter 使用最佳实践，让你少踩坑](https://mp.weixin.qq.com/s/obqh0FMzahRFa5sNe5eq3g)
-
-[java 从零实现属于你的 redis 分布式锁](https://mp.weixin.qq.com/s/MzybPDRGwaWXX8viE8adAA)
-
-[3天时间，我是如何解决redis bigkey删除问题的？](https://mp.weixin.qq.com/s/06tjn76uebvgfzYaahdY0g)
-
-[redis 多路复用](http://mirror.github.io/2018/09/08/redis-learn-45-multi-io)
-
-# 中间件等工具开源矩阵
-
-[heaven: 收集开发中常用的工具类](https://github.com/mirror/heaven)
-
-[rpc: 基于 netty4 实现的远程调用工具](https://github.com/mirror/rpc)
-
-[mq: 简易版 mq 实现](https://github.com/mirror/mq)
-
-[ioc: 模拟简易版 spring ioc](https://github.com/mirror/ioc)
-
-[mybatis: 简易版 mybatis](https://github.com/mirror/mybatis)
-
-[cache: 渐进式 redis 缓存](https://github.com/mirror/cache)
-
-[jdbc-pool: 数据库连接池实现](https://github.com/mirror/jdbc-pool)
-
-[sandglass: 任务调度时间工具框架](https://github.com/mirror/sandglass)
-
-[sisyphus: 支持注解的重试框架](https://github.com/mirror/sisyphus)
-
-[resubmit: 防止重复提交框架，支持注解](https://github.com/mirror/resubmit)
-
-[auto-log: 日志自动输出](https://github.com/mirror/auto-log)
-
-[async: 多线程异步并行框架](https://github.com/mirror/async)
-
-# 缓存相关工具
-
-[cache: 手写渐进式 redis](https://github.com/mirror/cache)
-
-[common-cache: 通用缓存标准定义](https://github.com/mirror/common-cache)
-
-[redis-config: 兼容各种常见的 redis 配置模式](https://github.com/mirror/redis-config)
-
-[lock: 开箱即用的分布式锁](https://github.com/mirror/lock)
-
-[resubmit: 防重复提交](https://github.com/mirror/resubmit)
-
-[rate-limit: 限流](https://github.com/mirror/rate-limit/)
-
