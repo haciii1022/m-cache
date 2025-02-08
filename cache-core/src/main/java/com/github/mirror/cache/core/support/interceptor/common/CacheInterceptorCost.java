@@ -33,7 +33,7 @@ public class CacheInterceptorCost<K,V> implements ICacheInterceptor<K,V> {
     public void after(ICacheInterceptorContext<K,V> context) {
         long costMills = context.endMills()-context.startMills();
         final String methodName = context.method().getName();
-        log.debug("Cost end, method: {}, cost: {}ms", methodName, costMills);
+        log.debug("Cost end, method: {}, cost: {} ms", methodName, costMills);
 
         // 添加慢日志操作
         List<ICacheSlowListener> slowListeners = context.cache().slowListeners();
