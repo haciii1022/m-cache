@@ -102,6 +102,19 @@ public final class CacheEvicts {
     }
 
     /**
+     * LRU 驱除策略
+     *
+     * 基于 LRU-K 实现
+     * @param <K> key
+     * @param <V> value
+     * @param k LRU-K
+     * @return 结果
+     * @since 0.1.0
+     */
+    public static <K, V> ICacheEvict<K, V> lruK(int k) {
+        return new CacheEvictLruK<>(k);
+    }
+    /**
      * LFU 驱除策略
      *
      * 基于 LFU 实现
